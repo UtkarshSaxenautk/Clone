@@ -38,7 +38,9 @@ function Kanban() {
   };
 
   const handleTouchMove = (e) => {
-    e.preventDefault();
+    if (draggedTodoItem.current) {
+      e.preventDefault();
+    }
   };
 
   const handleTouchEnd = (e) => {
@@ -48,7 +50,9 @@ function Kanban() {
 
   useEffect(() => {
     const handleTouch = (e) => {
-      e.preventDefault();
+      if (draggedTodoItem.current) {
+        e.preventDefault();
+      }
     };
 
     document.addEventListener('touchmove', handleTouch, { passive: false });
@@ -109,6 +113,7 @@ function Kanban() {
             className="h-full"
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => handleDrop(column)}
+            onTouchStart={(e) => handleTouchStart(e, null)}
             onTouchMove={(e) => handleTouchMove(e)}
             onTouchEnd={(e) => handleTouchEnd(e)}
           >
@@ -119,9 +124,6 @@ function Kanban() {
                   key={todo.id}
                   className="flex flex-col p-5 mb-5 bg-white rounded-2xl"
                   draggable={!('ontouchstart' in window)}
-                  onTouchStart={(e) => handleTouchStart(e, todo.id)}
-                  onTouchMove={(e) => handleTouchMove(e)}
-                  onTouchEnd={(e) => handleTouchEnd(e)}
                   onDragStart={(e) => handleDragStart(e, todo.id)}
                   onDragEnd={(e) => handleDragEnd(e)}
                   style={{
