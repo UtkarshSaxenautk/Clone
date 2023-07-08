@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { data } from '../assets/data.js';
 
 const board_columns = {
@@ -11,6 +11,7 @@ function Kanban() {
   const [todos, setTodos] = useState(data);
   const board_columns_map = Object.keys(board_columns);
   const draggedTodoItem = useRef(null);
+  const touchStartPosition = useRef({ x: 0, y: 0 });
 
   const handleDrop = (column) => {
     const index = todos.findIndex((todo) => todo.id === draggedTodoItem.current);
@@ -33,6 +34,7 @@ function Kanban() {
 
   const handleTouchStart = (e, todoId) => {
     draggedTodoItem.current = todoId;
+    touchStartPosition.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     e.target.style.cursor = 'grabbing';
     e.target.style.opacity = '0.5';
   };
@@ -40,27 +42,21 @@ function Kanban() {
   const handleTouchMove = (e) => {
     if (draggedTodoItem.current) {
       e.preventDefault();
+      const touchX = e.touches[0].clientX;
+      const touchY = e.touches[0].clientY;
+      const deltaX = touchX - touchStartPosition.current.x;
+      const deltaY = touchY - touchStartPosition.current.y;
+      e.target.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
     }
   };
 
   const handleTouchEnd = (e) => {
-    draggedTodoItem.current = null;
-    e.target.style.opacity = '1';
+    if (draggedTodoItem.current) {
+      draggedTodoItem.current = null;
+      e.target.style.opacity = '1';
+      e.target.style.transform = 'none';
+    }
   };
-
-  useEffect(() => {
-    const handleTouch = (e) => {
-      if (draggedTodoItem.current) {
-        e.preventDefault();
-      }
-    };
-
-    document.addEventListener('touchmove', handleTouch, { passive: false });
-
-    return () => {
-      document.removeEventListener('touchmove', handleTouch);
-    };
-  }, []);
 
   return (
     <div className="flex flex-col lg:flex-row gap-[15px]">
@@ -129,6 +125,7 @@ function Kanban() {
                   style={{
                     cursor: 'grab',
                     userSelect: 'none',
+                    touchAction: 'none',
                   }}
                 >
                   <div className="flex flex-row justify-between mb-1">
