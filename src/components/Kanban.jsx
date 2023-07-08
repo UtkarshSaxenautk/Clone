@@ -19,6 +19,18 @@ function Kanban() {
     setTodos(tempTodos);
   };
 
+  const handleDragStart = (e, todoId) => {
+    draggedTodoItem.current = todoId;
+    e.target.style.cursor = 'grabbing';
+    e.dataTransfer.effectAllowed = 'move';
+    e.target.style.opacity = '0.5';
+  };
+
+  const handleDragEnd = (e) => {
+    draggedTodoItem.current = null;
+    e.target.style.opacity = '1';
+  };
+
   const handleTouchStart = (e, todoId) => {
     draggedTodoItem.current = todoId;
     e.target.style.cursor = 'grabbing';
@@ -97,6 +109,8 @@ function Kanban() {
             className="h-full"
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => handleDrop(column)}
+            onTouchMove={(e) => handleTouchMove(e)}
+            onTouchEnd={(e) => handleTouchEnd(e)}
           >
             {todos
               .filter((todo) => todo.column === column)
@@ -104,9 +118,12 @@ function Kanban() {
                 <div
                   key={todo.id}
                   className="flex flex-col p-5 mb-5 bg-white rounded-2xl"
+                  draggable={!('ontouchstart' in window)}
                   onTouchStart={(e) => handleTouchStart(e, todo.id)}
-                  onTouchMove={handleTouchMove}
-                  onTouchEnd={handleTouchEnd}
+                  onTouchMove={(e) => handleTouchMove(e)}
+                  onTouchEnd={(e) => handleTouchEnd(e)}
+                  onDragStart={(e) => handleDragStart(e, todo.id)}
+                  onDragEnd={(e) => handleDragEnd(e)}
                   style={{
                     cursor: 'grab',
                     userSelect: 'none',
